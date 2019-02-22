@@ -1,0 +1,11 @@
+//- email.jade
+doctype html
+html
+  head
+    meta(http-equiv = 'Content-Type', content = 'text/html; charset=UTF-8')
+    title=`Reset Password For user ${name}`
+	body
+    h1 Hello!
+    p You received this email because user #{name} wants to reset the password:
+    a(href=`${link}`) Click here
+    p Otherwise just ignore it.
