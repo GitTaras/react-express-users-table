@@ -10,4 +10,5 @@ on server
 
 on client
 
--refactor
+- Refactor
+- Socket.io
