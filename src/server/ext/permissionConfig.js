@@ -62,9 +62,3 @@ module.exports.setRoles = (acl)=> {
     console.log("acl.addUserRoles Error: ", e)
   });
 }
-
-
-
-module.exports.checkForPermissions = function(acl) {
-
-}

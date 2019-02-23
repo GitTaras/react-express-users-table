@@ -3,36 +3,16 @@
 # dependencies
 /node_modules
 
-# testing
-/coverage
-
-# production
-/build
-
-
-
-
 #config
 /src/server/config.json
-
-
-
-/src/bootstrap.css
-/src/css
-/src/fonts
-/src/images
-/src/templates
-
 
 # some playground
 /src/server/models/subquery.js
 /src/server/models/foo.js
 /src/server/ext/tests.js
 /src/server/db.js
-/uploads
 
 *.*~
-
 
 
 # misc

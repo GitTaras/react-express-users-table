@@ -7,7 +7,7 @@ const state = {
   gfs: null,
 }
 
-exports.connect = (url, done) => {
+exports.connect = (url) => {
   try {
     if (state.db) return Promise.resolve();
 
@@ -18,10 +18,8 @@ exports.connect = (url, done) => {
         const gfs = Grid(db, mongo);
         state.db = db;
         state.gfs = gfs;
-        //gfs.collection('uploads')
         //console.log('conection...', gfs)
         resolve({db, gfs});
-        //gfs.collection('uploads');
         }
         reject(new Error(e));
       });
@@ -33,7 +31,7 @@ exports.connect = (url, done) => {
 }
 
 exports.getGfs = () => {
-  console.log('calling getGFS');
+  //console.log('calling getGFS');
   return state.gfs
 }
 

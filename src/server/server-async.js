@@ -9,8 +9,8 @@ let session = require("express-session");
 let ACL = require("acl");
 let permissionConfig = require('./ext/permissionConfig');
 let passport = require('passport');
-let localSignupStrategy = require('./passport/local-signup');
-let localLoginStrategy = require('./passport/local-login');
+//let localSignupStrategy = require('./passport/local-signup');
+let localLoginStrategy = require('./passport/local-login-async');
 let mailer = require('express-mailer');
 
 mailer.extend(app, {
@@ -50,19 +50,15 @@ app.use(function(req, res, next) {
 });
 
 app.use(passport.initialize());
-// console.log('passportinitilaze', passport);
-// console.log('localSignupStrategy',localSignupStrategy);
-// console.log('end');
 
-passport.use('local-signup', localSignupStrategy);
+
 passport.use('local-login',localLoginStrategy);
 
-// console.log('passportafterinitilaze', passport);
+
 
 let authCheckMiddleware = require('./authCheck-async').authCheck;
 app.use('/api', authCheckMiddleware);
-// app.use("/api/private", permit("admin"));
-// app.use(["/api/foo", "/api/bar"], permit("owner", "employee"))
+
 let publicRoutes =require('./routes/pub-async');
 let authRoutes = require('./routes/auth-async');
 let apiRoutes = require('./routes/api-async');
@@ -89,33 +85,26 @@ const getUserId = (req) => {
   }
 }
 
+const connect_n_start = async () => {
+  try {
+    await db.connect(config.url);
 
-await db.connect(config);
-console.log("starting ACL")
-node_acl = new ACL(new ACL.mongodbBackend(db.get(), '_acl'), logger())
-permissionConfig.setRoles(node_acl)
-app.use(node_acl.middleware(5, getUserId))
-console.log("end acl config")
+    console.log("starting ACL")
+    node_acl = new ACL(new ACL.mongodbBackend(db.get(), '_acl'), logger())
+    permissionConfig.setRoles(node_acl)
+    app.use(node_acl.middleware(5, getUserId))
+    console.log("end acl config")
 
+    module.exports = app;
 
-db.connect(config.url, function(error) {
-  if (error) {
-  	// response to user something!!!
-  	console.error("db error:", error)
+    app.listen(3001, function() {
+      console.log("listen on 3000 port");
+    });
+
+  } catch(e) {
+    console.error("db error:", error)
     process.exit(1)
-  } else {
-  	console.log("starting ACL")
-  	node_acl = new ACL(new ACL.mongodbBackend(db.get(), '_acl'), logger())
-  	permissionConfig.setRoles(node_acl)
-  	app.use(node_acl.middleware(5, getUserId))
-  	console.log("end acl config")
-  	// app.use(node_acl.middleware(5, req.currentUserId.toString()))
   }
-});
-// console.log('before mydb');
-// i need app to use in public route move it up before require pub route
-module.exports = app;
+}
 
-app.listen(3001, function() {
-  console.log("listen on 3000 port");
-});
+connect_n_start();

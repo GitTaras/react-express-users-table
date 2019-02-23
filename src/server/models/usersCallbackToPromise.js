@@ -1,8 +1,8 @@
 const db = require("../mydb.js");
 const ObjectID = require('mongodb').ObjectID;
 const bcrypt = require('bcrypt');
-const DomainsModel = require('./domains');
-const RolesModel = require('./roles');
+const DomainsModel = require('./domains-promise');
+const RolesModel = require('./roles-promise');
 const async = require('async');
 //const Grid = require('gridfs-stream');
 //const mongodb = require('mongodb');
@@ -249,8 +249,8 @@ async function searchUsersWithDomainAndRolesPromise(str, skip, limit, sort) {
     return Promise.all(users.map(async (user) => {
       try {
         let fns = [
-          findDomainByIdPromise(user.domainId),
-          findRoleByIdPromise(user.roleId)
+          DomainsModel.findById(user.domainId),
+          RolesModel.findById(user.roleId)
         ];
 
         let [domain, role] = await Promise.all(fns)
@@ -363,7 +363,6 @@ module.exports.updateUser = function(user) {
           if(err || user) {
             reject(new Error(err))
           }
-          console.log("user DB", user)
           console.log("DOCUMENTS WAS UPDATED")
           resolve(user)
         })
@@ -380,7 +379,6 @@ module.exports.deleteUser = function(id) {
       if (err || !user) {
         reject(new Error(err))
       } else {
-
         async.eachSeries(user.ImageIds, (imageId, cb) => {
           console.log('startEach')
           db.getGfs().remove({_id: ObjectID(imageId)},

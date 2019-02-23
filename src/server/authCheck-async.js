@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
-const UsersModel = require("./models/users.js");
-const RolesModel = require("./models/roles.js");
+const UsersModel = require("./models/users-promise.js");
+const RolesModel = require("./models/roles-promise.js");
 const config = require("./config");
 const util = require('util');
 
