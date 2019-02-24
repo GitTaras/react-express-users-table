@@ -12,14 +12,14 @@ exports.connect = (url) => {
     if (state.db) return Promise.resolve();
 
     return new Promise((resolve, reject) => {
-      MongoClient.connect(url, function(err, client) {
-        if(!err) {
-        const db = client.db('userAdminDB');
-        const gfs = Grid(db, mongo);
-        state.db = db;
-        state.gfs = gfs;
-        //console.log('conection...', gfs)
-        resolve({db, gfs});
+      MongoClient.connect(url, function(e, client) {
+        if(!e) {
+          const db = client.db('userAdminDB');
+          const gfs = Grid(db, mongo);
+          state.db = db;
+          state.gfs = gfs;
+          console.log('conection...', state.db)
+          resolve();
         }
         reject(new Error(e));
       });
@@ -36,8 +36,8 @@ exports.getGfs = () => {
 }
 
 exports.get = () => {
-  //console.log('calling get');
-  return state.db
+  console.log('calling get', state.db);
+  return state.db;
 }
 
 exports.close = () => {

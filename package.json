@@ -33,7 +33,7 @@
   },
   "scripts": {
     "start": "cuncurrently 'npm run react' 'npm run server' ",
-    "server": "nodemon src/server/server.js",
+    "server": "nodemon src/server/server-async.js",
     "react": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",

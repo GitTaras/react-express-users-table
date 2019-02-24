@@ -139,7 +139,6 @@ router.get('/user/:id', asyncHandler(checkReservedParams(async (req, res) => {
 // text=some+search+words&
 // how check for security ech filds?
 router.get('/users',  asyncHandler(async (req, res) => {
-
 	console.log("QUERY:", req.query)
 	console.log('sort_by', req.query.sort_by)
 	console.log(typeof(req.query.sort_by))
@@ -148,39 +147,13 @@ router.get('/users',  asyncHandler(async (req, res) => {
 	let limit = Number(req.query.limit) || 5
 	let searchStr = req.query.text
 	let sort = toSortObj(req.query.sort_by)
-	let result = await UserModel.searchWithCount(str, skip, limit, sort)
+	let result = await UserModel.searchWithCount(searchStr, skip, limit, sort)
 
-	res.status(200).json({
-		users: result.users,
-		totalCount: result.totalCount,
-		page: skip,
-		pageSize: limit,
+	res.status(200).json({result: result
 		/*nextPage: Math.ceil(totalCount/pageSize) > skip ? skip+1: skip*/
 	});
 
-	/*
-	result = {users: users,
-	        totalCount: totalCount,
-	        previus page: query[2].skip ? : query[2].skip : null
-	        page: query[2].skip+1,
-	        nextPage: query[2].skip+2
-	        };
-	*/
 	console.log("All ok", result.totalCount, result.pageSize)
-}))
-
-router.get('/users/:search', asyncHandler(async (req, res) => {
-
-	console.log('search string', req.params.text)
-	let querystr = req.params.text
-	let skip = Number(req.query.skip) ? (console.log("TypeOf skip", typeof(req.query.skip)), req.query.skip - 1): 0;
-	let limit = Number(req.query.limit) || 5;
-	let sort = toSortObj(req.query.sort_by)
-
-  let result = await UserModel.searchWithCount(req.params)
-    res.status(200).json({
-    	result: result
-    });
 }))
 
 router.post('/user',  upload.array('avatar', 4),/*upload.single('avatar'),*/asyncHandler(async (req, res) => {
@@ -203,9 +176,9 @@ router.post('/user',  upload.array('avatar', 4),/*upload.single('avatar'),*/asyn
 	user.ImageIds = ImageIds
 	user.createdAt = new Date().toLocaleString()
 
-	let user = await UserModel.addUser(user)
- 	console.log("posted", user)
- 	res.json(user)
+	let newUser = await UserModel.addUser(user)
+ 	console.log("posted", newUser)
+ 	res.json(newUser)
 }))
 
 router.put('/user/:id', upload.array('avatar', 4), asyncHandler(async (req, res) => {
@@ -227,9 +200,9 @@ router.put('/user/:id', upload.array('avatar', 4), asyncHandler(async (req, res)
 	}
 	user.updatedAt = new Date().toLocaleString()
 
-	let user = await UserModel.updateUser(user)
-	console.log("putted", user)
-	res.json(user)
+	let updatedUser = await UserModel.updateUser(user)
+	console.log("putted", updatedUser)
+	res.json(updatedUser)
 }))
 
 

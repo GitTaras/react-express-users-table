@@ -11,10 +11,6 @@ const tagOptions = [
 		text: 'Delete user',
 		value: 'Delete',
 	},
-	{
-		text: 'Suspend user',
-		value: 'Suspend',
-	},
 ];
 
 export default tagOptions;

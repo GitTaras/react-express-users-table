@@ -13,6 +13,7 @@ let passport = require('passport');
 let localLoginStrategy = require('./passport/local-login-async');
 let mailer = require('express-mailer');
 
+
 mailer.extend(app, {
   from: 'taras.sholt@gmail.com',
     host: 'smtp.gmail.com', // hostname
@@ -51,21 +52,21 @@ app.use(function(req, res, next) {
 
 app.use(passport.initialize());
 
-
 passport.use('local-login',localLoginStrategy);
-
-
 
 let authCheckMiddleware = require('./authCheck-async').authCheck;
 app.use('/api', authCheckMiddleware);
+module.exports = app;
 
-let publicRoutes =require('./routes/pub-async');
-let authRoutes = require('./routes/auth-async');
+//let publicRoutes =require('./routes/pub-async');
+let authRoutes = require('./routes/auth');
 let apiRoutes = require('./routes/api-async');
 
-app.use('/pub', publicRoutes)
+//app.use('/pub', publicRoutes)
 app.use('/auth', authRoutes);
 app.use('/api', apiRoutes);
+
+console.log(`before logger`);
 
 const logger = () => {
 	return {
@@ -85,26 +86,28 @@ const getUserId = (req) => {
   }
 }
 
-const connect_n_start = async () => {
-  try {
-    await db.connect(config.url);
+/*const connect_n_start = async () => {
+  try {*/
+    /*let db = await*/ db.connect(config.url)
+    .then(()=>{
+      console.log("starting ACL", db.get())
 
-    console.log("starting ACL")
-    node_acl = new ACL(new ACL.mongodbBackend(db.get(), '_acl'), logger())
-    permissionConfig.setRoles(node_acl)
-    app.use(node_acl.middleware(5, getUserId))
-    console.log("end acl config")
+      node_acl = new ACL(new ACL.mongodbBackend(db.get(), '_acl'), logger())
+      permissionConfig.setRoles(node_acl)
+      app.use(node_acl.middleware(5, getUserId))
+      console.log("end acl config")
+    }).catch((e)=>{console.error(e)});
 
-    module.exports = app;
 
-    app.listen(3001, function() {
-      console.log("listen on 3000 port");
-    });
-
-  } catch(e) {
+  /*} catch(e) {
     console.error("db error:", error)
     process.exit(1)
-  }
-}
+  }*/
+/*}*/
 
-connect_n_start();
+/*connect_n_start();*/
+
+
+app.listen(3001, function() {
+  console.log("listen on 3000 port");
+});

@@ -1,10 +1,10 @@
 const UserModel = require("../models/usersCallbackToPromise.js");
 const jwt = require('jsonwebtoken');
 const express = require('express');
-const router = new express.Router();
-const app = require('../server')
+let router = new express.Router();
+const app = require('../server');
 const util = require('util');
-const Media = require('../models/media.js');
+//const Media = require('../models/media.js');
 const sign = util.promisify(jwt.sign);
 const verify = util.promisify(jwt.verify);
 const sendMail = util.promisify(app.mailer.send);
@@ -12,46 +12,6 @@ const sendMail = util.promisify(app.mailer.send);
 router.get('/health', (req, res)=>{
   res.status(200).json({status: "all ok"})
 })
-
-https://stackoverflow.com/questions/44013020/using-promises-with-streams-in-node-js
-router.get('/image/:id', async (req, res)=> {
-  try {
-    console.log('typeof image param', typeof(req.params.id))
-    const id = req.params.id
-
-    if (Boolean(id) && (id.length == 12 || id.length == 24)) {
-      console.log('gettting image', id)
-      let file = await()
-      db.getGfs().files.findOne({_id: ObjectID(id)}, (err, file) => {
-        // Check if file
-        console.log(file)
-        if (err || !file || file.length === 0) {
-          return res.status(404).json({
-            err: 'No file exists'
-          });
-        }
-        // Check if image
-        if (file.contentType === 'image/jpeg' || file.contentType === 'image/png') {
-          // Read output to browser
-          const readstream = db.getGfs().createReadStream(file.filename);
-          readstream.pipe(res);
-        } else {
-          res.status(404).json({
-            err: 'Not an image'
-          });
-        }
-      });
-    } else {
-      res.status(404).json({
-        err: 'File not exists'
-      });
-    }
-  } catch(e) {
-    //todo
-  }
-
-});
-
 
 
 router.get('/image/:id', (req, res)=> {
@@ -93,7 +53,7 @@ router.post('/passwordreset', async (req, res) => {
 
     if (email !== undefined) {
 
-      const user = await UserModel.users([{ email: email }]);
+      const user = await UserModel.findByEmail(email);
 
       if (!user) {
         console.error('User not found');
@@ -144,7 +104,7 @@ router.post('/passwordreset', async (req, res) => {
 router.get('/resetpassword/:id/:token', async (req, res) => {
   try {
     try {
-      const user = await UserModel.users([{ _id: ObjectID(req.params.id) }]);
+      const user = await UserModel.findById(req.params.id);
       const secret = `${user.password}-${user.createdAt}`;
     } catch(e) {
       return res.status(404).json({error: 'User not found'});
@@ -172,7 +132,7 @@ router.post('/changepassword', async function(req, res) {
     const password = req.body.password;
     if (id && token && password.length>=8) {
       try {
-        const user = await UserModel.users([{ _id: ObjectID(id) }]);
+        const user = await UserModel.findById(id);
       } catch(e) {
         return res.status(404)
             .json({error: 'User not found'});

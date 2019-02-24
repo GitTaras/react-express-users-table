@@ -7,7 +7,7 @@ module.exports.findById = function(id) {
     // console.log("idformDomain",  id);
     db.get().collection('domains').findOne({_id: ObjectID(id)}, function(err, domain) {
       // console.log("DEBUG: domainsFindByID DB", domain);  // null if nofing to find
-      if (err || !domain) {
+      if (err) {
         reject(new Error(err));
       }
       resolve(domain);
@@ -35,7 +35,7 @@ module.exports.addDomain = function(domain) {
 module.exports.domains = function(query) {
   return new Promise((resolve, reject)=> {
     db.get().collection('domains').find(query || {}).toArray(function(err, domains) {
-      if(err || !domains) {
+      if(err) {
         reject(new Error(err));
       }
       resolve(domains);

@@ -77,7 +77,7 @@ export const RenderImageFild =(field) => {
           // fields.avatar.handleChange(files);
           field.input.onChange(e.target.files)
         }}
-        ref={(element) => {console.log("1"); return avaInputRef=element;}}
+        ref={(element) => {return avaInputRef=element;}}
       />
       <Button type="button" onClick={()=> handleClick()}>Choose Files</Button>
     </Form.Field>

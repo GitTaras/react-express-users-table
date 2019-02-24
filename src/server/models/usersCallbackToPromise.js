@@ -121,7 +121,18 @@ module.exports.updateUserPassword = function(userId, newPassword) {
   })
 };
 
-
+module.exports.findByEmail = function(email) {
+  return new Promise((resolve, reject)=> {
+    db.get().collection('users').findOne({email: email}, function(e, user) {
+      if (e) {
+        console.log(`findByEmail error ${e}`);
+        reject(new Error(e));
+      }
+      console.log('findByEmail success', user);
+      resolve(user);
+    });
+  })
+}
 
 /**
  * Query user by id
@@ -149,6 +160,42 @@ module.exports.findById = function(userId) {
   })
 };
 
+/**
+ * Query all users with roles for acl
+ *
+ * @returns {promise} with e or users
+ */
+
+module.exports.getUsersWithRoles = function() {
+  return new Promise((resolve, reject)=>{
+    console.log("start getUsersWithRoles")
+    console.log(db.get());
+    db.get().collection('users').find({})
+    .toArray((err, users) => {
+
+      if (!err) {
+        console.log("getUsersWithRoles find users success", users[0])
+
+        resolve(
+          Promise.all(users.map(async (user) => {
+            try {
+              let result = await RolesModel.findById(user.roleId);
+              user.role = result ? result.role : 'user';
+              console.log(`result ${result}`);
+              return user;
+            } catch(e) {
+              console.error("getUsersWithRoles: RolesModel error", result, err)
+            }
+          }))
+        );
+
+      } else {
+        console.log("getUsersWithRoles error")
+        reject(new Error(err))
+      }
+    })
+  })
+}
 
 /*  after mongo upgrade
 db.users.aggregate([{ $lookup: {from: "roles",localField: "roleId",foreignField: "_id",as: "roles_doc"} }])
@@ -181,7 +228,7 @@ function countMatchesPromise (str) {
   //const query1 = {$text: {$search: pat}}
   return new Promise((resolve, reject)=>{
     try {
-      db.collection('users')
+      db.get().collection('users')
       .find(findQuery)
       .count(function(err, count) {
 
@@ -221,8 +268,8 @@ function searchUsersPromise(str, skip, limit, sort) {
 
   return new Promise((resolve, reject)=>{
     try {
-      db.collection('users')
-      .find(query).sort(sort).skip(limit*skip)
+      db.get().collection('users')
+      .find(findQuery).sort(sort).skip(limit*skip)
       .limit(limit).project(project)
       .toArray(function(err, users) {
         //console.log("inside users", users);
@@ -255,8 +302,8 @@ async function searchUsersWithDomainAndRolesPromise(str, skip, limit, sort) {
 
         let [domain, role] = await Promise.all(fns)
 
-        user.domain = domain ? domain : undefined;
-        user.role = role ? role : undefined;
+        user.domain = domain ? domain.domain : undefined;
+        user.role = role ? role.role : undefined;
 
         return user;
       } catch (e) {
@@ -276,7 +323,7 @@ module.exports.searchWithCount = async function (str, skip, limit, sort) {
     let fns = [countMatchesPromise(str), searchUsersWithDomainAndRolesPromise(str, skip, limit, sort)];
     let [totalCount, users] = await Promise.all(fns);
     console.log("then:", totalCount, users);
-    return {totalCount, users};
+    return {totalCount, users, page: skip, pageSize: limit};
   } catch (e) {
     console.log(`searchWithCount error: ${e}`);
     throw e;
@@ -330,8 +377,6 @@ module.exports.checkMail = function(userId, mail) {
 * @returns {object} callback
 */
 
-
-/
 module.exports.comparePassword = function (password, userHashFromDB) {
   return bcrypt.compare(password, userHashFromDB);
   // console.log("in1", password, userHashFromDB);
@@ -347,7 +392,7 @@ module.exports.updateUser = function(user) {
   return new Promise((resolve, reject)=>{
 
     db.get().collection('users').updateOne(
-    {_id: ObjectID(userId)}, {$set: ...rest},
+    {_id: ObjectID(userId)}, {$set: rest},
     (err, result)=>{
       console.log('updateOne')
 
@@ -360,7 +405,7 @@ module.exports.updateUser = function(user) {
         { _id: 1, FirstName: 1, LastName: 1, email: 1,domainId: 1,
         roleId: 1, lastSignIn: 1}, (err, user)=> {
 
-          if(err || user) {
+          if(err || !user) {
             reject(new Error(err))
           }
           console.log("DOCUMENTS WAS UPDATED")

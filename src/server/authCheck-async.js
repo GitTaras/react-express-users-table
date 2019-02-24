@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const UsersModel = require("./models/users-promise.js");
+const UsersModel = require("./models/usersCallbackToPromise.js");
 const RolesModel = require("./models/roles-promise.js");
 const config = require("./config");
 const util = require('util');
@@ -8,7 +8,6 @@ const verify = util.promisify(jwt.verify);
 
 module.exports.authCheck = async (req, res, next) => {
 	try {
-
 		if (!req.headers.authorization) {
 			return res.status(401).end();
 		}
@@ -26,7 +25,7 @@ module.exports.authCheck = async (req, res, next) => {
 
 		const result = await RolesModel.findById(user.roleId);
 		req.currentUserRole = result.role;
-		return.next();
+		return next();
 	} catch(e) {
 		console.error(`authCheck err: ${e}`);
 		return res.status(401).end();

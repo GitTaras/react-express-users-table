@@ -22,7 +22,8 @@ module.exports.setRoles = (acl)=> {
     }, {
         roles: 'guest',
         allows: [
-          { resources: '/pub', permissions: '*' }
+          { resources: '/pub', permissions: '*' },
+          { resources: '/favicon.ico', permissions: '*' },
         ]
     }
   ]);
